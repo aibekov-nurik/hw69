@@ -1,10 +1,11 @@
-# calculator_project/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('webapp.urls')),
-    path('', include('calculator.urls')),
+    path('webapp/', include('webapp.urls')),
+    path('calculator/', include('calculator.urls')),
+    path('blog/', include('blog.urls')),
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
-

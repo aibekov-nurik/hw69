@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Detail</title>
+</head>
+<body>
+    <h1 id="article-title">Article Title</h1>
+    <p id="article-content">Article Content</p>
+
+    <button onclick="editArticle()">Edit Article</button>
+    <button onclick="deleteArticle()">Delete Article</button>
+
+    <h2>Comments</h2>
+    <ul id="comments-list">
+        <!-- Список комментариев будет загружен сюда через JS -->
+    </ul>
+    <button onclick="addComment()">Add Comment</button>
+
+    <script>
+        const articleId = window.location.pathname.split('/').slice(-2, -1)[0];
+
+        // Функция для загрузки данных статьи
+        async function loadArticle() {
+            const response = await fetch(`/api/articles/${articleId}/`);
+            const article = await response.json();
+            document.getElementById('article-title').innerText = article.title;
+            document.getElementById('article-content').innerText = article.content;
+            loadComments();
+        }
+
+        // Функция для редактирования статьи
+        async function editArticle() {
+            const title = prompt('Edit article title:', document.getElementById('article-title').innerText);
+            const content = prompt('Edit article content:', document.getElementById('article-content').innerText);
+            const response = await fetch(`/api/articles/${articleId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, content }),
+            });
+            if (response.ok) {
+                loadArticle();
+            } else {
+                alert('Failed to update article.');
+            }
+        }
+
+        // Функция для удаления статьи
+        async function deleteArticle() {
+            if (confirm('Are you sure you want to delete this article?')) {
+                const response = await fetch(`/api/articles/${articleId}/`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    window.location.href = '/articles/';
+                } else {
+                    alert('Failed to delete article.');
+                }
+            }
+        }
+
+        // Функция для загрузки комментариев
+        async function loadComments() {
+            const response = await fetch(`/api/articles/${articleId}/comments/`);
+            const comments = await response.json();
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = '';
+            comments.forEach(comment => {
+                const li = document.createElement('li');
+                li.innerHTML = comment.text;
+                commentsList.appendChild(li);
+            });
+        }
+
+        // Функция для добавления нового комментария
+        async function addComment() {
+            const text = prompt('Enter your comment:');
+            const response = await fetch(`/api/articles/${articleId}/comments/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+            if (response.ok) {
+                loadComments();
+            } else {
+                alert('Failed to add comment.');
+            }
+        }
+
+        // Загрузка данных статьи при загрузке страницы
+        loadArticle();
+    </script>
+</body>
+</html>

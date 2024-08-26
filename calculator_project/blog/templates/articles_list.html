@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Articles List</title>
+</head>
+<body>
+    <h1>Articles</h1>
+    <ul id="articles-list">
+        <!-- Список статей будет загружен сюда через JS -->
+    </ul>
+    <button onclick="createArticle()">Create New Article</button>
+    
+    <script>
+        // Функция для загрузки списка статей
+        async function loadArticles() {
+            const response = await fetch('/api/articles/');
+            const articles = await response.json();
+            const articlesList = document.getElementById('articles-list');
+            articlesList.innerHTML = '';
+            articles.forEach(article => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="/articles/${article.id}/">${article.title}</a>`;
+                articlesList.appendChild(li);
+            });
+        }
+
+        // Функция для создания новой статьи
+        async function createArticle() {
+            const title = prompt('Enter article title:');
+            const content = prompt('Enter article content:');
+            const response = await fetch('/api/articles/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, content }),
+            });
+            if (response.ok) {
+                loadArticles();
+            } else {
+                alert('Failed to create article.');
+            }
+        }
+
+        // Загрузка статей при загрузке страницы
+        loadArticles();
+    </script>
+</body>
+</html>
